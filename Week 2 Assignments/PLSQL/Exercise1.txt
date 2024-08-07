@@ -1,0 +1,87 @@
+Exercise 1: Control Structures
+
+Scenario 1: The bank wants to apply a discount to loan interest rates for customers above 60 years old.
+Question: Write a PL/SQL block that loops through all customers, checks their age, and if they are above 60, apply a 1% discount to their current loan interest rates.
+
+DECLARE
+    CURSOR customer_cursor IS
+        SELECT customer_id, age
+        FROM customers;
+    v_customer_id customers.customer_id%TYPE;
+    v_age customers.age%TYPE;
+BEGIN
+    OPEN customer_cursor;
+    LOOP
+        FETCH customer_cursor INTO v_customer_id, v_age;
+        EXIT WHEN customer_cursor%NOTFOUND;
+        
+        IF v_age > 60 THEN
+            UPDATE loans
+            SET interest_rate = interest_rate - 1
+            WHERE customer_id = v_customer_id;
+        END IF;
+    END LOOP;
+    CLOSE customer_cursor;
+    COMMIT;
+END;
+
+Scenario 2: A customer can be promoted to VIP status based on their balance.
+    Question: Write a PL/SQL block that iterates through all customers and sets a flag IsVIP to TRUE for those with a balance over $10,000.
+
+DECLARE
+    CURSOR customer_cursor IS
+        SELECT customer_id, balance
+        FROM customers;
+    v_customer_id customers.customer_id%TYPE;
+    v_balance customers.balance%TYPE;
+BEGIN
+    OPEN customer_cursor;
+    LOOP
+        FETCH customer_cursor INTO v_customer_id, v_balance;
+        EXIT WHEN customer_cursor%NOTFOUND;
+        
+        IF v_balance > 10000 THEN
+            UPDATE customers
+            SET IsVIP = 'TRUE'
+            WHERE customer_id = v_customer_id;
+        END IF;
+    END LOOP;
+    CLOSE customer_cursor;
+    COMMIT;
+END;
+
+Scenario 3: The bank wants to send reminders to customers whose loans are due within the next 30 days.
+	Question: Write a PL/SQL block that fetches all loans due in the next 30 days and prints a reminder message for each customer.
+
+DECLARE
+    CURSOR loan_cursor IS
+        SELECT customer_id, due_date 
+        FROM loans 
+        WHERE due_date BETWEEN SYSDATE AND SYSDATE + 30;
+    
+    v_customer_id loans.customer_id%TYPE;
+    v_due_date loans.due_date%TYPE;
+    v_customer_name customers.name%TYPE;
+BEGIN
+    OPEN loan_cursor;
+    
+    LOOP
+        FETCH loan_cursor INTO v_customer_id, v_due_date;
+        EXIT WHEN loan_cursor%NOTFOUND;
+        
+        -- Retrieve the customer name
+        SELECT name INTO v_customer_name 
+        FROM customers 
+        WHERE customer_id = v_customer_id;
+        
+        -- Print reminder message
+        DBMS_OUTPUT.PUT_LINE('Reminder: Dear ' || v_customer_name || 
+         ', your loan is due on ' || TO_CHAR(v_due_date, 'DD-MON-YYYY'));
+    END LOOP;
+    
+    CLOSE loan_cursor;
+END;
+
+
+
+
