@@ -2,6 +2,8 @@ package com.onlineBookStore.BookStoreApi.controller;
 
 import com.onlineBookStore.BookStoreApi.model.Book;
 import lombok.Data;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -19,7 +21,10 @@ public class BookController {
     }
 
     // Creating a Book REST Api
+    // Excercise 5 Customizing Response Status and Headers
+
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Book createBook(@RequestBody Book book) {
         books.add(book);
         return book;
@@ -68,6 +73,7 @@ public class BookController {
     }
     @Data
     public class Customer {
+        final int SHAPE_SQUARE = 2;
         private int id;
         private String name;
         private String email;
@@ -75,7 +81,14 @@ public class BookController {
 
     // Processing Form Data
     @PostMapping("/register")
-    public Customer registerCustomer(@ModelAttribute Customer Customer customer) {
+    public Customer registerCustomer(@ModelAttribute Customer customer) {
         return customer;
+    }
+    // Getting a ResponseEntity with Custom headers
+    @GetMapping("/{id}")
+    public ResponseEntity<Book> getBookWithHeaders(@PathVariable int id) {
+        return ResponseEntity.ok()
+                .header("Id not Found", "book not Found")
+                .body(books.get(id));
     }
 }
